@@ -1,0 +1,143 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using Microsoft.Win32.SafeHandles;
+using System;
+using System.Linq;
+using System.Security.Claims;
+using System.Security.Principal;
+using Xunit;
+
+public class WindowsIdentityTests
+{
+    [Fact]
+    public static void GetAnonymousUserTest()
+    {
+        WindowsIdentity windowsIdentity = WindowsIdentity.GetAnonymous();
+        Assert.NotNull(windowsIdentity);
+        Assert.True(windowsIdentity.IsAnonymous);
+        Assert.False(windowsIdentity.IsAuthenticated);
+        CheckDispose(windowsIdentity, true);        
+    }
+
+    [Fact]
+    public static void ConstructorsAndProperties()
+    {
+        // Retrieve the Windows account token for the current user.
+        SafeAccessTokenHandle token = WindowsIdentity.GetCurrent().AccessToken;
+        bool gotRef = false;
+        try
+        {
+            token.DangerousAddRef(ref gotRef);
+            IntPtr logonToken = token.DangerousGetHandle();
+
+            // Construct a WindowsIdentity object using the input account token.
+            WindowsIdentity windowsIdentity = new WindowsIdentity(logonToken);
+            Assert.NotNull(windowsIdentity);
+            CheckDispose(windowsIdentity);
+
+            string authenticationType = "WindowsAuthentication";
+            WindowsIdentity windowsIdentity2 = new WindowsIdentity(logonToken, authenticationType);
+            Assert.NotNull(windowsIdentity2);
+            Assert.True(windowsIdentity2.IsAuthenticated);
+
+            Assert.Equal(authenticationType, windowsIdentity2.AuthenticationType);
+            CheckDispose(windowsIdentity2);
+        }
+        finally
+        {
+            if (gotRef)
+                token.DangerousRelease();
+        }
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public static void CloneAndProperties(bool cloneViaSerialization)
+    {
+        SafeAccessTokenHandle token = WindowsIdentity.GetCurrent().AccessToken;
+        bool gotRef = false;
+        try
+        {
+            token.DangerousAddRef(ref gotRef);
+            IntPtr logonToken = token.DangerousGetHandle();
+            WindowsIdentity winId = new WindowsIdentity(logonToken);
+
+            WindowsIdentity cloneWinId = cloneViaSerialization ?
+                BinaryFormatterHelpers.Clone(winId) :
+                winId.Clone() as WindowsIdentity;
+            Assert.NotNull(cloneWinId);
+
+            Assert.Equal(winId.IsSystem, cloneWinId.IsSystem);
+            Assert.Equal(winId.IsGuest, cloneWinId.IsGuest);
+            Assert.Equal(winId.ImpersonationLevel, cloneWinId.ImpersonationLevel);
+
+            Assert.Equal(winId.Name, cloneWinId.Name);
+            Assert.Equal(winId.Owner, cloneWinId.Owner);
+
+            IdentityReferenceCollection irc1 = winId.Groups;
+            IdentityReferenceCollection irc2 = cloneWinId.Groups;
+            Assert.Equal(irc1.Count, irc2.Count);
+
+            CheckDispose(winId);
+            CheckDispose(cloneWinId);
+        }
+        finally
+        {
+            if (gotRef)
+                token.DangerousRelease();
+        }
+    }
+
+    [Fact]
+    public static void GetTokenHandle()
+    {
+        WindowsIdentity id = WindowsIdentity.GetCurrent();
+        Assert.Equal(id.AccessToken.DangerousGetHandle(), id.Token);
+    }
+
+    [Fact]
+    public static void CheckDeviceClaims()
+    {
+        using (WindowsIdentity id = WindowsIdentity.GetCurrent())
+        {
+            int manualCount = id.Claims.Count(c => c.Properties.ContainsKey(ClaimTypes.WindowsDeviceClaim));
+            int autoCount = id.DeviceClaims.Count();
+
+            Assert.Equal(manualCount, autoCount);
+        }
+    }
+
+    [Fact]
+    public static void CheckUserClaims()
+    {
+        using (WindowsIdentity id = WindowsIdentity.GetCurrent())
+        {
+            Claim[] allClaims = id.Claims.ToArray();
+            int deviceCount = allClaims.Count(c => c.Properties.ContainsKey(ClaimTypes.WindowsDeviceClaim));
+            int manualCount = allClaims.Length - deviceCount;
+            int autoCount = id.UserClaims.Count();
+
+            Assert.Equal(manualCount, autoCount);
+        }
+    }
+
+    private static void CheckDispose(WindowsIdentity identity, bool anonymous = false)
+    {
+        Assert.False(identity.AccessToken.IsClosed);
+        try
+        {
+            identity.Dispose();
+        }
+        catch { }
+        Assert.True(identity.AccessToken.IsClosed);
+        if (!anonymous)
+        {
+            Assert.Throws<ObjectDisposedException>(() => identity.Name);
+            Assert.Throws<ObjectDisposedException>(() => identity.Owner);
+            Assert.Throws<ObjectDisposedException>(() => identity.User);
+        }
+    }
+}
