@@ -31,6 +31,11 @@ extern int sethostname(const char *, size_t);
 extern int sethostid(long);
 #endif
 
+#if defined(__sun__) && defined(__svr4__)
+extern int getdomainname (char *__name, size_t __len);
+extern int setdomainname (const char *__name, size_t __len);
+#endif
+
 #include "mph.h" /* Don't remove or move after map.h! Works around issues with Android SDK unified headers */
 #include "map.h"
 
