@@ -38,6 +38,9 @@
 #if defined(__APPLE__) && __APPLE__
 #include <sys/socketvar.h>
 #endif
+#if defined(__sun__) && defined(__svr4__)
+#include <sys/filio.h>
+#endif
 #if !HAVE_GETDOMAINNAME && HAVE_UTSNAME_DOMAINNAME
 #include <sys/utsname.h>
 #include <stdio.h>
