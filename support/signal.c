@@ -31,6 +31,11 @@
 #include <mono/metadata/appdomain.h>
 #endif
 
+#if defined(__sun__) && defined(__svr4__)
+#include <sys/proc.h>
+extern void psignal(proc_t *, int);
+#endif
+
 G_BEGIN_DECLS
 
 typedef void (*mph_sighandler_t)(int);
