@@ -30,8 +30,13 @@ Mono_Posix_SockaddrStorage_get_size (void)
 int
 Mono_Posix_SockaddrUn_get_sizeof_sun_path (void)
 {
+#if defined(__sun__) && defined(__svr4__)
+	struct sockaddr_un t_sun;
+	return sizeof (t_sun.sun_path);
+#else
 	struct sockaddr_un sun;
 	return sizeof (sun.sun_path);
+#endif
 }
 
 int
@@ -43,14 +48,22 @@ Mono_Posix_Cmsghdr_getsize (void)
 int
 Mono_Posix_FromInAddr (struct Mono_Posix_InAddr* source, void* destination)
 {
+#if defined(__sun__) && defined(__svr4__)
+	memcpy (&((struct in_addr*)destination)->s_addr, &source->t_addr, 4);
+#else
 	memcpy (&((struct in_addr*)destination)->s_addr, &source->s_addr, 4);
+#endif
 	return 0;
 }
 
 int
 Mono_Posix_ToInAddr (void* source, struct Mono_Posix_InAddr* destination)
 {
+#if defined(__sun__) && defined(__svr4__)
+	memcpy (&destination->t_addr, &((struct in_addr*)source)->s_addr, 4);
+#else
 	memcpy (&destination->s_addr, &((struct in_addr*)source)->s_addr, 4);
+#endif
 	return 0;
 }
 
