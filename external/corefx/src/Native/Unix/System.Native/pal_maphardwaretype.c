@@ -8,6 +8,10 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 
+#if defined(__sun__) && defined(__svr4__)
+#undef AF_PACKET
+#endif
+
 #if defined(AF_PACKET)
 #include <linux/if_packet.h>
 #include <linux/if_arp.h>
