@@ -11,6 +11,11 @@
 // git add fsharp-deeptail/*
 //
 // Note This is valid C++98 for use with older compilers, where C++11 would be desirable.
+
+#if defined(__sun__) && defined(__svr4__)
+#undef _XOPEN_SOURCE_EXTENDED
+#endif
+
 #include <stdlib.h>
 #include <iostream>
 #include <fstream>
