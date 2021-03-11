@@ -39,6 +39,10 @@
 #include <mono/utils/atomic.h>
 #include <mono/utils/mono-counters.h>
 
+#if defined(__sun__) && defined(__svr4__)
+extern int madvise(caddr_t, size_t, int);
+#endif
+
 #define BEGIN_CRITICAL_SECTION do { \
 	MonoThreadInfo *__info = mono_thread_info_current_unchecked (); \
 	if (__info) __info->inside_critical_region = TRUE;	\
