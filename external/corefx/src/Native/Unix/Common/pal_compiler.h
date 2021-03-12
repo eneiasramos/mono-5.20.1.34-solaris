@@ -27,4 +27,9 @@
 #define c_static_assert(e)
 #endif
 
+#if defined(__sun__) && defined(__svr4__)
+#undef static_assert
+#define c_static_assert(e)
+#endif
+
 #define DLLEXPORT __attribute__ ((__visibility__ ("default")))
