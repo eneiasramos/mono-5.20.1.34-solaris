@@ -31,10 +31,6 @@
 #include <mono/metadata/appdomain.h>
 #endif
 
-#if defined(__sun__) && defined(__svr4__)
-#include <sys/proc.h>
-extern void psignal(proc_t *, int);
-#endif
 
 G_BEGIN_DECLS
 
@@ -145,7 +141,7 @@ int Mono_Posix_FromRealTimeSignum (int offset, int *r)
  * then, we may have to do this anyways, as psignal, while present in
  * libc, isn't in PASE headers - so do it anyways
  */
-#if defined(_AIX)
+#if defined(_AIX) || (defined(__sun__) && defined(__svr4__))
 extern void psignal(int, const char *);
 #endif
 
