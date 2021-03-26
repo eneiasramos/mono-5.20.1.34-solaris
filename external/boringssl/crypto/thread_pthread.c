@@ -24,8 +24,10 @@
 #include <openssl/type_check.h>
 
 
+#if !defined(__sun__) && !defined(__svr4__)
 OPENSSL_COMPILE_ASSERT(sizeof(CRYPTO_MUTEX) >= sizeof(pthread_rwlock_t),
                        CRYPTO_MUTEX_too_small);
+#endif
 
 void CRYPTO_MUTEX_init(CRYPTO_MUTEX *lock) {
   if (pthread_rwlock_init((pthread_rwlock_t *) lock, NULL) != 0) {
