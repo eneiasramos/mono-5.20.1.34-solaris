@@ -3957,6 +3957,10 @@ case "$host" in
 			BTLS_PLATFORM=x86_64
 			AC_CHECK_HEADER(stdalign.h,[],[BTLS_SUPPORTED=no])
 			;;
+		  solaris*)
+			BTLS_SUPPORTED=yes
+			BTLS_PLATFORM=x86_64
+			;;
 		  darwin*)
 			AOT_SUPPORTED="yes"
 			BTLS_SUPPORTED=yes
