@@ -140,7 +140,7 @@ int Mono_Posix_FromRealTimeSignum (int offset, int *r)
  * then, we may have to do this anyways, as psignal, while present in
  * libc, isn't in PASE headers - so do it anyways
  */
-#if defined(_AIX)
+#if defined(_AIX) || defined(__SVR4)
 extern void psignal(int, const char *);
 #endif
 
