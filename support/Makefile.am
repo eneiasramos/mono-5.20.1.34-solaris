@@ -56,6 +56,7 @@ MPH_UNIX_SOURCE =				\
 	syslog.c				\
 	time.c					\
 	unistd.c				\
+	getdomainname.c				\
 	utime.c					\
 	x-struct-str.c
 

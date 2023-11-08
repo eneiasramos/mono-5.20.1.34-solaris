@@ -41,7 +41,7 @@ namespace System.Net.NetworkInformation {
 		static extern int gethostname ([MarshalAs (UnmanagedType.LPArray, SizeParamIndex = 1)] byte [] name, int len);
 
 #if !ORBIS
-		[DllImport ("libc")]
+		[DllImport ("libMonoPosixHelper")]
 		static extern int getdomainname ([MarshalAs (UnmanagedType.LPArray, SizeParamIndex = 1)] byte [] name, int len);
 #else
 		static int getdomainname ([MarshalAs (UnmanagedType.LPArray, SizeParamIndex = 1)] byte [] name, int len)
