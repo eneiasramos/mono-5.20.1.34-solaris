@@ -2841,6 +2841,9 @@ namespace System.Net.Sockets
 #if MOBILE
 			return true;
 #else
+			if (Environment.OSVersion.Platform == PlatformID.Unix)
+				return true;
+
 			var nics = NetworkInterface.GetAllNetworkInterfaces ();
 			foreach (var adapter in nics) {
 				if (adapter.Supports (networkInterface))
